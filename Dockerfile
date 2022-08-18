@@ -6,15 +6,15 @@ ENV user=dependencycheck
 ENV version_url=https://jeremylong.github.io/DependencyCheck/current.txt
 ENV download_url=https://github.com/jeremylong/DependencyCheck/releases/download
 
-RUN apt-get update                                                          && \
-    apt-get install -y --no-install-recommends wget ruby mono-runtime unzip      && \
-    gem install bundle-audit                                                && \
+RUN apt-get update                                                              && \
+    apt-get install -y --no-install-recommends wget ruby mono-runtime unzip     && \
+    gem install bundle-audit                                                    && \
     gem cleanup
 
 RUN wget -O /tmp/current.txt ${version_url}                                 && \
     version=$(cat /tmp/current.txt)                                         && \
     file="dependency-check-${version}-release.zip"                          && \
-    wget "$download_url/v${version}/$file"                                              && \
+    wget "$download_url/v${version}/$file"                                  && \
     unzip ${file}                                                           && \
     rm ${file}                                                              && \
     mv dependency-check /usr/share/                                         && \
@@ -25,10 +25,10 @@ RUN wget -O /tmp/current.txt ${version_url}                                 && \
     apt-get remove --purge -y wget                                          && \
     apt-get autoremove -y                                                   && \
     rm -rf /var/lib/apt/lists/* /tmp/*
- 
+
 USER ${user}
 
-VOLUME ["/src" "/usr/share/dependency-check/data" "/report"]
+VOLUME ["/src", "/usr/share/dependency-check/data", "/report"]
 
 WORKDIR /src
 
