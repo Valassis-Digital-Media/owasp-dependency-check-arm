@@ -51,14 +51,20 @@ docker-ecr-create-repository:
 docker-ssh:
 	docker run -it  --entrypoint='/bin/bash' ${DOCKER_IMAGE_URI}
 
+install-qemu-emulators:
+	docker run -it --rm --privileged tonistiigi/binfmt --install all
+
 #----PODMAN----
+
+podman-machine-bootstrap:
+	podman machine init
+	podman machine start
 
 podman-build:
 	podman build --rm -t ${DOCKER_IMAGE_URI} \
 	--no-cache \
 	--arch=amd64 \
 	-f $(SELF_DIR_SCRIPTS)Dockerfile ./$(SELF_DIR_SCRIPTS)
-	podman tag ${DOCKER_IMAGE_URI} ${DOCKER_IMAGE_ID}:arm
+	podman tag ${DOCKER_IMAGE_URI} ${DOCKER_IMAGE_ID}:amd64
 
-install-qemu-emulators:
-	docker run -it --rm --privileged tonistiigi/binfmt --install all
+
