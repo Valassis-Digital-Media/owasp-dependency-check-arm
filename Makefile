@@ -17,21 +17,29 @@ get-version:
 get-project-name:
 	@echo ${PROJECT_NAME}
 
+docker-create-builder:
+	docker buildx create --name mybuilder --driver-opt network=host --use
+
 docker-build:
-	docker build --rm -t ${DOCKER_IMAGE_URI} \
+	docker build --rm -t ${DOCKER_IMAGE_ID}:arm \
 	--no-cache \
-	-f $(SELF_DIR_SCRIPTS)Dockerfile ./$(SELF_DIR_SCRIPTS)
-	docker tag ${DOCKER_IMAGE_URI} ${DOCKER_IMAGE_ID}:arm
+	-f $(SELF_DIR_SCRIPTS)Dockerfile $(SELF_DIR_SCRIPTS)
+	$(MAKE) docker-push
 
 docker-push:
 	docker push ${DOCKER_IMAGE_ID}:arm
 
 docker-build-multi-arch:
 	docker buildx build \
+	--no-cache \
 	--platform linux/arm64/v8,linux/amd64 \
 	--builder=mybuilder \
 	--push \
-	--tag ${DOCKER_IMAGE_ID}:buildx-latest .
+	--tag ${DOCKER_IMAGE_URI} \
+	--tag ${DOCKER_IMAGE_ID}:latest .
+
+docker-inspect-multi-arch:
+	docker inspect ${DOCKER_IMAGE_URI}
 
 docker-ecr-login:
 	aws ecr get-login-password | docker login --username AWS --password-stdin $(DOCKER_HUB)
