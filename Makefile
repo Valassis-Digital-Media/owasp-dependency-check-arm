@@ -4,7 +4,8 @@ VERSION ?= $(shell cat $(SELF_DIR_SCRIPTS)version.txt)
 
 PROJECT_NAME = dependency-check
 DOCKER_HUB ?= 155136788633.dkr.ecr.eu-west-1.amazonaws.com
-DOCKER_IMAGE_ID = $(DOCKER_HUB)/owasp/${PROJECT_NAME}
+DOCKER_IMAGE_NAME=owasp/${PROJECT_NAME}
+DOCKER_IMAGE_ID = $(DOCKER_HUB)/$(DOCKER_IMAGE_NAME)
 DOCKER_IMAGE_URI=${DOCKER_IMAGE_ID}:${VERSION}
 
 get-docker-tag:
@@ -22,6 +23,9 @@ docker-build:
 	-f $(SELF_DIR_SCRIPTS)Dockerfile ./$(SELF_DIR_SCRIPTS)
 	docker tag ${DOCKER_IMAGE_URI} ${DOCKER_IMAGE_ID}:arm
 
+docker-push:
+	docker push ${DOCKER_IMAGE_ID}:arm
+
 docker-build-multi-arch:
 	docker buildx build \
 	--platform linux/arm64/v8,linux/amd64 \
@@ -29,9 +33,11 @@ docker-build-multi-arch:
 	--push \
 	--tag ${DOCKER_IMAGE_ID}:buildx-latest .
 
-docker-login-ecr:
-	aws ecr get-login-password --region eu-west-1 | \
-	docker login --username AWS --password-stdin 155136788633.dkr.ecr.eu-west-1.amazonaws.com
+docker-ecr-login:
+	aws ecr get-login-password | docker login --username AWS --password-stdin $(DOCKER_HUB)
+
+docker-ecr-create-repository:
+	aws ecr create-repository --repository-name $(DOCKER_IMAGE_NAME)
 
 # SSH into the image built by `docker-build` to inspect the contents of the image
 docker-ssh:
