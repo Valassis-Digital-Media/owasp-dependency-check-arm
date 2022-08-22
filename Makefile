@@ -24,12 +24,20 @@ docker-build:
 
 docker-build-multi-arch:
 	docker buildx build \
-    --platform linux/arm/v7,linux/arm64/v8,linux/amd64 \
-    --tag ${DOCKER_IMAGE_ID}:buildx-latest .
+	--platform linux/arm64/v8,linux/amd64 \
+	--builder=mybuilder \
+	--push \
+	--tag ${DOCKER_IMAGE_ID}:buildx-latest .
+
+docker-login-ecr:
+	aws ecr get-login-password --region eu-west-1 | \
+	docker login --username AWS --password-stdin 155136788633.dkr.ecr.eu-west-1.amazonaws.com
 
 # SSH into the image built by `docker-build` to inspect the contents of the image
 docker-ssh:
 	docker run -it  --entrypoint='/bin/bash' ${DOCKER_IMAGE_URI}
+
+#----PODMAN----
 
 podman-build:
 	podman build --rm -t ${DOCKER_IMAGE_URI} \
@@ -37,3 +45,6 @@ podman-build:
 	--arch=amd64 \
 	-f $(SELF_DIR_SCRIPTS)Dockerfile ./$(SELF_DIR_SCRIPTS)
 	podman tag ${DOCKER_IMAGE_URI} ${DOCKER_IMAGE_ID}:arm
+
+install-qemu-emulators:
+	docker run -it --rm --privileged tonistiigi/binfmt --install all
