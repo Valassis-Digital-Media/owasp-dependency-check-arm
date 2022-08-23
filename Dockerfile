@@ -1,4 +1,4 @@
-FROM openjdk:8-jre-slim
+FROM docker.io/openjdk:8-jre-slim
 
 MAINTAINER Timo Pagel <dependencycheckmaintainer@timo-pagel.de>
 

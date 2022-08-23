@@ -8,6 +8,9 @@ DOCKER_IMAGE_NAME=owasp/${PROJECT_NAME}
 DOCKER_IMAGE_ID = $(DOCKER_HUB)/$(DOCKER_IMAGE_NAME)
 DOCKER_IMAGE_URI=${DOCKER_IMAGE_ID}:${VERSION}
 
+export PLATFORM_ARCH=linux/amd64,linux/arm64
+
+
 get-docker-tag:
 	@echo ${DOCKER_IMAGE_URI}
 
@@ -32,7 +35,7 @@ docker-push:
 docker-build-multi-arch:
 	docker buildx build \
 	--no-cache \
-	--platform linux/arm64/v8,linux/amd64 \
+	--platform ${PLATFORM_ARCH} \
 	--builder=mybuilder \
 	--push \
 	--tag ${DOCKER_IMAGE_URI} \
@@ -51,7 +54,7 @@ docker-ecr-create-repository:
 docker-ssh:
 	docker run -it  --entrypoint='/bin/bash' ${DOCKER_IMAGE_URI}
 
-install-qemu-emulators:
+docker-install-qemu-emulators:
 	docker run -it --rm --privileged tonistiigi/binfmt --install all
 
 #----PODMAN----
@@ -67,4 +70,12 @@ podman-build:
 	-f $(SELF_DIR_SCRIPTS)Dockerfile ./$(SELF_DIR_SCRIPTS)
 	podman tag ${DOCKER_IMAGE_URI} ${DOCKER_IMAGE_ID}:amd64
 
-
+podman-build-multi-arch:
+	buildah build --jobs=2 --platform=${PLATFORM_ARCH} --manifest shazam .
+	skopeo inspect --raw containers-storage:localhost/shazam | \
+          jq '.manifests[].platform.architecture'
+	buildah tag localhost/shazam $(DOCKER_IMAGE_URI)
+	buildah tag localhost/shazam ${DOCKER_IMAGE_ID}:latest
+	buildah manifest rm localhost/shazam
+	buildah manifest push --all $(DOCKER_IMAGE_URI) docker://$(DOCKER_IMAGE_URI)
+	buildah manifest push --all ${DOCKER_IMAGE_ID}:latest docker://${DOCKER_IMAGE_ID}:latest
