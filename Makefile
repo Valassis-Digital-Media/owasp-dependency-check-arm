@@ -9,7 +9,7 @@ DOCKER_IMAGE_ID = $(DOCKER_HUB)/$(DOCKER_IMAGE_NAME)
 DOCKER_IMAGE_URI=${DOCKER_IMAGE_ID}:${VERSION}
 
 export PLATFORM_ARCH=linux/amd64,linux/arm64
-
+export AWS_DEFAULT_REGION=eu-west-1
 
 get-docker-tag:
 	@echo ${DOCKER_IMAGE_URI}
@@ -45,10 +45,10 @@ docker-inspect-multi-arch:
 	docker inspect ${DOCKER_IMAGE_URI}
 
 docker-ecr-login:
-	aws ecr get-login-password --region eu-west-1 | docker login --username AWS --password-stdin $(DOCKER_HUB)
+	aws ecr get-login-password | docker login --username AWS --password-stdin $(DOCKER_HUB)
 
-docker-ecr-create-repository:
-	aws ecr create-repository --region eu-west-1 --repository-name $(DOCKER_IMAGE_NAME)
+aws-ecr-create-repository:
+	aws ecr create-repository --repository-name $(DOCKER_IMAGE_NAME)
 
 # SSH into the image built by `docker-build` to inspect the contents of the image
 docker-ssh:
@@ -79,3 +79,6 @@ podman-build-multi-arch:
 	buildah manifest rm localhost/shazam
 	buildah manifest push --all $(DOCKER_IMAGE_URI) docker://$(DOCKER_IMAGE_URI)
 	buildah manifest push --all ${DOCKER_IMAGE_ID}:latest docker://${DOCKER_IMAGE_ID}:latest
+
+podman-ecr-login:
+	aws ecr get-login-password | podman login --username AWS --password-stdin $(DOCKER_HUB)
