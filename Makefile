@@ -8,7 +8,7 @@ DOCKER_IMAGE_NAME=owasp/${PROJECT_NAME}
 DOCKER_IMAGE_ID = $(DOCKER_HUB)/$(DOCKER_IMAGE_NAME)
 DOCKER_IMAGE_URI=${DOCKER_IMAGE_ID}:${VERSION}
 
-export PLATFORM_ARCH=linux/amd64,linux/arm64
+export PLATFORM_ARCH=linux/amd64,linux/arm64,linux/arm64/v8,linux/arm64/v7
 export AWS_DEFAULT_REGION=eu-west-1
 
 get-docker-tag:
@@ -64,7 +64,7 @@ podman-machine-bootstrap:
 	podman machine start
 
 podman-build:
-	buildah build --jobs=2 --platform=${PLATFORM_ARCH} --manifest shazam .
+	buildah build --jobs=4 --platform=${PLATFORM_ARCH} --manifest shazam .
 	skopeo inspect --raw containers-storage:localhost/shazam | \
           jq '.manifests[].platform.architecture'
 	buildah tag localhost/shazam $(DOCKER_IMAGE_URI)
@@ -77,6 +77,8 @@ podman-ecr-login:
 	aws ecr get-login-password | podman login --username AWS --password-stdin $(DOCKER_HUB)
 
 get-arch-multiarch-with-docker:
+	docker pull --platform "linux/arm64" "${DOCKER_IMAGE_URI}"
+	docker pull --platform "linux/amd64" "${DOCKER_IMAGE_URI}"
 	docker run --rm --entrypoint=/usr/bin/arch $(DOCKER_IMAGE_URI)
 	docker run --rm --platform linux/arm64 --entrypoint=/usr/bin/arch $(DOCKER_IMAGE_URI)
 	docker run --rm --platform linux/amd64 --entrypoint=/usr/bin/arch $(DOCKER_IMAGE_URI)
