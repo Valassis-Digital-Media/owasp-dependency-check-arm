@@ -8,7 +8,7 @@ DOCKER_IMAGE_NAME=owasp/${PROJECT_NAME}
 DOCKER_IMAGE_ID = $(DOCKER_HUB)/$(DOCKER_IMAGE_NAME)
 DOCKER_IMAGE_URI=${DOCKER_IMAGE_ID}:${VERSION}
 
-export PLATFORM_ARCH=linux/amd64,linux/arm64,linux/arm64/v8,linux/arm64/v7
+export PLATFORM_ARCH=linux/amd64,linux/arm64,linux/arm64/v8
 export AWS_DEFAULT_REGION=eu-west-1
 
 get-docker-tag:
