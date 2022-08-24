@@ -64,13 +64,6 @@ podman-machine-bootstrap:
 	podman machine start
 
 podman-build:
-	podman build --rm -t ${DOCKER_IMAGE_URI} \
-	--no-cache \
-	--arch=amd64 \
-	-f $(SELF_DIR_SCRIPTS)Dockerfile ./$(SELF_DIR_SCRIPTS)
-	podman tag ${DOCKER_IMAGE_URI} ${DOCKER_IMAGE_ID}:amd64
-
-podman-build-multi-arch:
 	buildah build --jobs=2 --platform=${PLATFORM_ARCH} --manifest shazam .
 	skopeo inspect --raw containers-storage:localhost/shazam | \
           jq '.manifests[].platform.architecture'
@@ -82,3 +75,8 @@ podman-build-multi-arch:
 
 podman-ecr-login:
 	aws ecr get-login-password | podman login --username AWS --password-stdin $(DOCKER_HUB)
+
+get-arch-multiarch-with-docker:
+	docker run --rm --entrypoint=/usr/bin/arch $(DOCKER_IMAGE_URI)
+	docker run --rm --platform linux/arm64 --entrypoint=/usr/bin/arch $(DOCKER_IMAGE_URI)
+	docker run --rm --platform linux/amd64 --entrypoint=/usr/bin/arch $(DOCKER_IMAGE_URI)
