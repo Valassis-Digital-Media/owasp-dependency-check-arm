@@ -45,10 +45,10 @@ docker-inspect-multi-arch:
 	docker inspect ${DOCKER_IMAGE_URI}
 
 docker-ecr-login:
-	aws ecr get-login-password | docker login --username AWS --password-stdin $(DOCKER_HUB)
+	aws ecr get-login-password --region eu-west-1 | docker login --username AWS --password-stdin $(DOCKER_HUB)
 
 docker-ecr-create-repository:
-	aws ecr create-repository --repository-name $(DOCKER_IMAGE_NAME)
+	aws ecr create-repository --region eu-west-1 --repository-name $(DOCKER_IMAGE_NAME)
 
 # SSH into the image built by `docker-build` to inspect the contents of the image
 docker-ssh:
