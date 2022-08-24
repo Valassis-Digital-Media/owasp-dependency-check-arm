@@ -77,8 +77,6 @@ podman-ecr-login:
 	aws ecr get-login-password | podman login --username AWS --password-stdin $(DOCKER_HUB)
 
 get-arch-multiarch-with-docker:
-	docker pull --platform "linux/arm64" "${DOCKER_IMAGE_URI}"
-	docker pull --platform "linux/amd64" "${DOCKER_IMAGE_URI}"
-	docker run --rm --entrypoint=/usr/bin/arch $(DOCKER_IMAGE_URI)
-	docker run --rm --platform linux/arm64 --entrypoint=/usr/bin/arch $(DOCKER_IMAGE_URI)
-	docker run --rm --platform linux/amd64 --entrypoint=/usr/bin/arch $(DOCKER_IMAGE_URI)
+	docker run --rm --pull=always --entrypoint=/usr/bin/arch $(DOCKER_IMAGE_URI)
+	docker run --rm --pull=always --platform linux/arm64 --entrypoint=/usr/bin/arch $(DOCKER_IMAGE_URI)
+	docker run --rm --pull=always --platform linux/amd64 --entrypoint=/usr/bin/arch $(DOCKER_IMAGE_URI)
