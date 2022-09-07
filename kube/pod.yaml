@@ -18,6 +18,7 @@ spec:
       containers:
         - name: odc
           image: djimenezc/podman
+          imagePullPolicy: Always
           securityContext:
             privileged: true
       tolerations:
@@ -25,3 +26,12 @@ spec:
           key: ARCH
           operator: Equal
           value: ARM64
+      affinity:
+        nodeAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+            nodeSelectorTerms:
+              - matchExpressions:
+                  - key: kubernetes.io/arch
+                    operator: In
+                    values:
+                      - arm64

@@ -65,8 +65,7 @@ podman-machine-bootstrap:
 
 podman-build:
 	buildah build --jobs=4 --platform=${PLATFORM_ARCH} --manifest shazam .
-	skopeo inspect --raw containers-storage:localhost/shazam | \
-          jq '.manifests[].platform.architecture'
+	skopeo inspect --raw containers-storage:localhost/shazam
 	buildah tag localhost/shazam $(DOCKER_IMAGE_URI)
 	buildah tag localhost/shazam ${DOCKER_IMAGE_ID}:latest
 	buildah manifest rm localhost/shazam
