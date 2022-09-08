@@ -8,7 +8,7 @@ DOCKER_IMAGE_NAME=owasp/${PROJECT_NAME}
 DOCKER_IMAGE_ID = $(DOCKER_HUB)/$(DOCKER_IMAGE_NAME)
 DOCKER_IMAGE_URI=${DOCKER_IMAGE_ID}:${VERSION}
 
-export PLATFORM_ARCH=linux/arm64,linux/arm64/v8,linux/amd64
+export PLATFORM_ARCH=linux/amd64
 export AWS_DEFAULT_REGION=eu-west-1
 
 get-docker-tag:
@@ -80,3 +80,11 @@ get-arch-multiarch-with-docker:
 	docker run --rm --pull=always --platform linux/arm64 --entrypoint=/usr/bin/arch $(DOCKER_IMAGE_URI)
 	docker run --rm --pull=always --platform linux/arm64/v8 --entrypoint=/usr/bin/arch $(DOCKER_IMAGE_URI)
 	docker run --rm --pull=always --platform linux/amd64 --entrypoint=/usr/bin/arch $(DOCKER_IMAGE_URI)
+
+podman-run-multiple-arch:
+	podman run --rm -t docker.io/arm64v8/ubuntu uname -m
+	podman run --rm -t docker.io/amd64/ubuntu uname -m
+
+docker-run-multiple-arch:
+	docker run --rm -t docker.io/arm64v8/ubuntu uname -m
+	docker run --rm -t docker.io/amd64/ubuntu uname -m
