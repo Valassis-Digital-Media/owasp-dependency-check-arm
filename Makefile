@@ -48,7 +48,10 @@ docker-ecr-login:
 	aws ecr get-login-password | docker login --username AWS --password-stdin $(DOCKER_HUB)
 
 aws-ecr-create-repository:
-	aws ecr create-repository --repository-name $(DOCKER_IMAGE_NAME)
+	aws ecr describe-repositories --repository-names "$(DOCKER_IMAGE_NAME)" || \
+	aws ecr create-repository \
+	    --repository-name "$(DOCKER_IMAGE_NAME)" \
+	    --image-scanning-configuration scanOnPush=true
 
 # SSH into the image built by `docker-build` to inspect the contents of the image
 docker-ssh:
