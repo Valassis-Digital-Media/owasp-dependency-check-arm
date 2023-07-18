@@ -48,7 +48,10 @@ docker-ecr-login:
 	aws ecr get-login-password | docker login --username AWS --password-stdin $(DOCKER_HUB)
 
 aws-ecr-create-repository:
-	aws ecr create-repository --repository-name $(DOCKER_IMAGE_NAME)
+	aws ecr describe-repositories --repository-names "$(DOCKER_IMAGE_NAME)" || \
+	aws ecr create-repository \
+	    --repository-name "$(DOCKER_IMAGE_NAME)" \
+	    --image-scanning-configuration scanOnPush=true
 
 # SSH into the image built by `docker-build` to inspect the contents of the image
 docker-ssh:
@@ -65,8 +68,7 @@ podman-machine-bootstrap:
 
 podman-build:
 	buildah build --jobs=4 --platform=${PLATFORM_ARCH} --manifest shazam .
-	skopeo inspect --raw containers-storage:localhost/shazam | \
-          jq '.manifests[].platform.architecture'
+	skopeo inspect --raw containers-storage:localhost/shazam
 	buildah tag localhost/shazam $(DOCKER_IMAGE_URI)
 	buildah tag localhost/shazam ${DOCKER_IMAGE_ID}:latest
 	buildah manifest rm localhost/shazam
@@ -81,3 +83,11 @@ get-arch-multiarch-with-docker:
 	docker run --rm --pull=always --platform linux/arm64 --entrypoint=/usr/bin/arch $(DOCKER_IMAGE_URI)
 	docker run --rm --pull=always --platform linux/arm64/v8 --entrypoint=/usr/bin/arch $(DOCKER_IMAGE_URI)
 	docker run --rm --pull=always --platform linux/amd64 --entrypoint=/usr/bin/arch $(DOCKER_IMAGE_URI)
+
+podman-run-multiple-arch:
+	podman run --rm -t docker.io/arm64v8/ubuntu uname -m
+	podman run --rm -t --arch=amd64 docker.io/amd64/ubuntu uname -m
+
+docker-run-multiple-arch:
+	docker run --rm -t docker.io/arm64v8/ubuntu uname -m
+	docker run --rm -t docker.io/amd64/ubuntu uname -m

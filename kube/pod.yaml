@@ -1,0 +1,37 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: odc-deployment
+  namespace: david
+  labels:
+    app: odc
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: odc
+  template:
+    metadata:
+      labels:
+        app: odc
+    spec:
+      containers:
+        - name: odc
+          image: djimenezc/podman
+          imagePullPolicy: Always
+          securityContext:
+            privileged: true
+      tolerations:
+        - effect: NoSchedule
+          key: ARCH
+          operator: Equal
+          value: ARM64
+      affinity:
+        nodeAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+            nodeSelectorTerms:
+              - matchExpressions:
+                  - key: kubernetes.io/arch
+                    operator: In
+                    values:
+                      - arm64
